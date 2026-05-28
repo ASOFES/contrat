@@ -657,6 +657,23 @@ function loadTemplate() {
   });
 }
 
+function getBMKStarterTemplate() {
+  return {
+    title: "Dossier Complet Unifie - BMK",
+    clientName: "Societe BMK",
+    clientContact: "+243 820 001 470 / +243 852 554 135",
+    projectAmount: 1700,
+    signatureDate: "",
+    designScope: bmkDesignScope,
+    contractTerms: bmkContractTerms
+  };
+}
+
+function loadNewContractFromButton() {
+  requireSession();
+  fillForm(getBMKStarterTemplate());
+}
+
 function formatDate(dateIso) {
   if (!dateIso) return t("dateUnknown");
   return new Date(dateIso).toLocaleDateString(currentLanguage === "fr" ? "fr-FR" : "en-US");
@@ -1115,7 +1132,7 @@ function switchLanguage(event) {
 
 els.form.addEventListener("submit", publishContract);
 els.saveTemplateBtn.addEventListener("click", saveTemplateFromCurrentForm);
-els.newContractBtn.addEventListener("click", loadTemplate);
+els.newContractBtn.addEventListener("click", loadNewContractFromButton);
 els.exportBtn.addEventListener("click", exportCurrentContractAsText);
 els.exportA4Btn.addEventListener("click", exportCurrentContractA4);
 els.registerForm.addEventListener("submit", registerUser);

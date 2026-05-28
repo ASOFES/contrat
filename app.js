@@ -55,6 +55,7 @@ const els = {
   saveTemplateBtn: document.getElementById("save-template-btn"),
   newContractBtn: document.getElementById("new-contract-btn"),
   exportBtn: document.getElementById("export-btn"),
+  exportA4Btn: document.getElementById("export-a4-btn"),
   cardTemplate: document.getElementById("contract-card-template")
 };
 
@@ -92,6 +93,7 @@ const i18n = {
     publishBtn: "Publier le contrat",
     saveTemplateBtn: "Enregistrer comme modele",
     exportBtn: "Exporter en texte",
+    exportA4Btn: "Exporter A4 (PDF)",
     publishedTitle: "Contrats publies",
     loadBtn: "Charger",
     viewContent: "Voir le contenu",
@@ -149,6 +151,7 @@ const i18n = {
     publishBtn: "Publish contract",
     saveTemplateBtn: "Save as template",
     exportBtn: "Export as text",
+    exportA4Btn: "Export A4 (PDF)",
     publishedTitle: "Published contracts",
     loadBtn: "Load",
     viewContent: "View content",
@@ -212,6 +215,7 @@ function applyLanguage() {
   els.publishBtn.textContent = t("publishBtn");
   els.saveTemplateBtn.textContent = t("saveTemplateBtn");
   els.exportBtn.textContent = t("exportBtn");
+  els.exportA4Btn.textContent = t("exportA4Btn");
   els.publishedTitle.textContent = t("publishedTitle");
   els.registerCompany.placeholder = t("companyExample");
   els.registerFullname.placeholder = t("fullnameExample");
@@ -762,6 +766,90 @@ function exportCurrentContractAsText() {
   URL.revokeObjectURL(url);
 }
 
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function exportCurrentContractA4() {
+  const draft = getDraftFromForm();
+  const signedDate = draft.signatureDate ? formatDate(draft.signatureDate) : "________________";
+  const safeTitle = escapeHtml(draft.title || "Contrat");
+  const safeClientName = escapeHtml(draft.clientName || "Client");
+  const safeClientContact = escapeHtml(draft.clientContact || "-");
+  const safeAmount = escapeHtml(String(draft.projectAmount || 0));
+  const safeScope = escapeHtml(draft.designScope || "").replace(/\n/g, "<br>");
+  const safeTerms = escapeHtml(draft.contractTerms || "").replace(/\n/g, "<br>");
+
+  const popup = window.open("", "_blank", "width=900,height=1000");
+  if (!popup) return;
+
+  popup.document.write(`
+    <!doctype html>
+    <html lang="fr">
+      <head>
+        <meta charset="utf-8">
+        <title>${safeTitle} - A4</title>
+        <style>
+          @page { size: A4; margin: 16mm; }
+          body { font-family: "Segoe UI", Arial, sans-serif; color: #0f172a; line-height: 1.45; }
+          .doc { max-width: 180mm; margin: 0 auto; }
+          .header { border-bottom: 2px solid #1d4ed8; padding-bottom: 8px; margin-bottom: 12px; }
+          .brand { font-size: 11px; color: #1d4ed8; font-weight: 700; letter-spacing: .4px; }
+          h1 { margin: 3px 0 0; font-size: 22px; }
+          .meta { margin-top: 7px; font-size: 12px; color: #334155; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 14px; }
+          .box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px; font-size: 12px; }
+          h2 { font-size: 15px; margin: 14px 0 7px; color: #1e3a8a; }
+          .block { border: 1px solid #dbe4f0; border-radius: 10px; padding: 10px; font-size: 12px; }
+          .signatures { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+          .sig { border-top: 1px solid #334155; padding-top: 6px; min-height: 56px; font-size: 12px; }
+          .footer { margin-top: 14px; font-size: 11px; color: #64748b; }
+          @media print { .print-btn { display: none; } }
+        </style>
+      </head>
+      <body>
+        <div class="doc">
+          <div class="header">
+            <div class="brand">ASOFES | CONTRAT DE PRESTATION</div>
+            <h1>${safeTitle}</h1>
+            <div class="meta">Date de signature: ${signedDate}</div>
+          </div>
+          <div class="grid">
+            <div class="box"><strong>Client</strong><br>${safeClientName}<br>Contact: ${safeClientContact}</div>
+            <div class="box"><strong>Projet</strong><br>Montant: ${safeAmount} USD<br>Portail: ASOFES Publication</div>
+          </div>
+
+          <h2>Dossier de conception</h2>
+          <div class="block">${safeScope}</div>
+
+          <h2>Clauses contractuelles</h2>
+          <div class="block">${safeTerms}</div>
+
+          <div class="signatures">
+            <div>
+              <div><strong>Le Prestataire</strong></div>
+              <div class="sig">Nom: ASOFES / Toto Mulumba<br>Signature: ____________________</div>
+            </div>
+            <div>
+              <div><strong>Le Client</strong></div>
+              <div class="sig">Nom: ${safeClientName}<br>Signature: ____________________</div>
+            </div>
+          </div>
+
+          <div class="footer">Document genere depuis le portail ASOFES. Format A4.</div>
+          <p><button class="print-btn" onclick="window.print()">Imprimer / Exporter en PDF</button></p>
+        </div>
+      </body>
+    </html>
+  `);
+  popup.document.close();
+}
+
 function renderContracts() {
   const contracts = readContracts();
   els.contractsList.innerHTML = "";
@@ -931,6 +1019,7 @@ els.form.addEventListener("submit", publishContract);
 els.saveTemplateBtn.addEventListener("click", saveTemplateFromCurrentForm);
 els.newContractBtn.addEventListener("click", loadTemplate);
 els.exportBtn.addEventListener("click", exportCurrentContractAsText);
+els.exportA4Btn.addEventListener("click", exportCurrentContractA4);
 els.registerForm.addEventListener("submit", registerUser);
 els.loginForm.addEventListener("submit", loginUser);
 els.logoutBtn.addEventListener("click", logoutUser);

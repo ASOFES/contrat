@@ -127,7 +127,7 @@ const i18n = {
     accountExists: "Ce compte existe deja pour cette societe.",
     badCredentials: "Informations de connexion invalides.",
     bmkLoaded: "Projet BMK precharge dans ce profil (modele + contrat publie).",
-    companyExample: "Ex: Societe Client",
+    companyExample: "BMK",
     fullnameExample: "Ex: Jean Kasongo",
     exportFileFallback: "contrat"
   },
@@ -193,7 +193,7 @@ const i18n = {
     accountExists: "This account already exists for this company.",
     badCredentials: "Invalid login credentials.",
     bmkLoaded: "BMK project preloaded in this profile (template + published contract).",
-    companyExample: "Ex: Client Company",
+    companyExample: "BMK",
     fullnameExample: "Ex: John Doe",
     exportFileFallback: "contract"
   }

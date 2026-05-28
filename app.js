@@ -966,15 +966,18 @@ function loadTemplate() {
 }
 
 function getBMKStarterTemplate() {
+  const frContent = window.BMK_CONTENT_FR;
+  const enContent = window.BMK_CONTENT_EN;
   const useEnglish = currentLanguage === "en";
+  const content = useEnglish ? enContent : frContent;
   return {
-    title: useEnglish ? "Unified Master Dossier - BMK" : "Dossier Complet Unifie - BMK",
-    clientName: "Societe BMK",
-    clientContact: "+243 820 001 470 / +243 852 554 135",
-    projectAmount: 1700,
+    title: content?.title || (useEnglish ? "Unified Master Dossier - BMK" : "Dossier Complet Unifie - BMK"),
+    clientName: content?.clientName || "Societe BMK",
+    clientContact: content?.clientContact || "+243 820 001 470 / +243 852 554 135",
+    projectAmount: content?.projectAmount || 1700,
     signatureDate: "",
-    designScope: useEnglish ? bmkDesignScopeEn : bmkDesignScope,
-    contractTerms: useEnglish ? bmkContractTermsEn : bmkContractTerms
+    designScope: content?.designScope || (useEnglish ? bmkDesignScopeEn : bmkDesignScope),
+    contractTerms: content?.contractTerms || (useEnglish ? bmkContractTermsEn : bmkContractTerms)
   };
 }
 
@@ -984,9 +987,10 @@ function syncBMKLanguageContentForSession() {
 
   const store = getCompanyStore(currentSession.companyId);
   const useEnglish = currentLanguage === "en";
-  const expectedTitle = useEnglish ? "Unified Master Dossier - BMK" : "Dossier Complet Unifie - BMK";
-  const expectedScope = useEnglish ? bmkDesignScopeEn : bmkDesignScope;
-  const expectedTerms = useEnglish ? bmkContractTermsEn : bmkContractTerms;
+  const expected = getBMKStarterTemplate();
+  const expectedTitle = expected.title;
+  const expectedScope = expected.designScope;
+  const expectedTerms = expected.contractTerms;
 
   if (store.template) {
     store.template = {
@@ -1028,23 +1032,14 @@ function isBMKDossierContract(contract) {
 
 function getLocalizedContract(contract) {
   if (!isBMKDossierContract(contract)) return contract;
-  if (currentLanguage === "en") {
-    return {
-      ...contract,
-      title: "Unified Master Dossier - BMK",
-      clientName: "Societe BMK",
-      clientContact: "+243 820 001 470 / +243 852 554 135",
-      designScope: bmkDesignScopeEn,
-      contractTerms: bmkContractTermsEn
-    };
-  }
+  const expected = getBMKStarterTemplate();
   return {
     ...contract,
-    title: "Dossier Complet Unifie - BMK",
-    clientName: "Societe BMK",
-    clientContact: "+243 820 001 470 / +243 852 554 135",
-    designScope: bmkDesignScope,
-    contractTerms: bmkContractTerms
+    title: expected.title,
+    clientName: expected.clientName,
+    clientContact: expected.clientContact,
+    designScope: expected.designScope,
+    contractTerms: expected.contractTerms
   };
 }
 
@@ -1551,26 +1546,9 @@ function closeEditorPanel() {
 }
 
 function translateProjectTemplate() {
-  const isEnglish = currentLanguage === "en";
-  const template = isEnglish
-    ? {
-        title: "Unified Master Dossier - BMK",
-        clientName: "Societe BMK",
-        clientContact: "+243 820 001 470 / +243 852 554 135",
-        projectAmount: Number(els.projectAmount.value || 1700),
-        signatureDate: els.signatureDate.value,
-        designScope: bmkDesignScopeEn,
-        contractTerms: bmkContractTermsEn
-      }
-    : {
-        title: "Dossier Complet Unifie - BMK",
-        clientName: "Societe BMK",
-        clientContact: "+243 820 001 470 / +243 852 554 135",
-        projectAmount: Number(els.projectAmount.value || 1700),
-        signatureDate: els.signatureDate.value,
-        designScope: bmkDesignScope,
-        contractTerms: bmkContractTerms
-      };
+  const template = getBMKStarterTemplate();
+  template.projectAmount = Number(els.projectAmount.value || template.projectAmount || 1700);
+  template.signatureDate = els.signatureDate.value;
   fillForm(template);
 }
 

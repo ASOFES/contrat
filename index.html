@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publication Contrats - BMK</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1 id="app-title">Publication de Contrats</h1>
+      <p id="topbar-subtitle">Client: BMK | Modele reutilisable pour les prochains contrats</p>
+    </div>
+    <div class="topbar-actions">
+      <label class="inline-control">
+        <span id="language-label">Langue</span>
+        <select id="language-switch">
+          <option value="fr">FR</option>
+          <option value="en">EN</option>
+        </select>
+      </label>
+      <span id="session-info" class="muted light"></span>
+      <button id="new-contract-btn" class="secondary">Nouveau contrat depuis modele</button>
+      <button id="logout-btn" class="secondary">Deconnexion</button>
+    </div>
+  </header>
+
+  <main id="auth-screen" class="layout auth-layout">
+    <section class="panel">
+      <h2 id="register-title">Creer un compte client</h2>
+      <form id="register-form" class="stack">
+        <label>
+          <span id="register-company-label">Nom de la societe</span>
+          <input type="text" id="register-company" placeholder="Ex: Societe BMK" required>
+        </label>
+        <label>
+          <span id="register-fullname-label">Votre nom</span>
+          <input type="text" id="register-fullname" placeholder="Ex: Jean Kasongo" required>
+        </label>
+        <label>
+          <span id="register-email-label">Email (identifiant)</span>
+          <input type="email" id="register-email" required>
+        </label>
+        <label>
+          <span id="register-password-label">Mot de passe</span>
+          <input type="password" id="register-password" required>
+        </label>
+        <button id="register-submit-btn" type="submit">Creer mon compte</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2 id="login-title">Connexion client</h2>
+      <form id="login-form" class="stack">
+        <label>
+          <span id="login-company-label">Nom de la societe</span>
+          <input type="text" id="login-company" required>
+        </label>
+        <label>
+          <span id="login-email-label">Email</span>
+          <input type="email" id="login-email" required>
+        </label>
+        <label>
+          <span id="login-password-label">Mot de passe</span>
+          <input type="password" id="login-password" required>
+        </label>
+        <button id="login-submit-btn" type="submit">Se connecter</button>
+      </form>
+      <p id="shared-note" class="muted">Meme societe = meme apercu profil, contrats, projet et commentaires.</p>
+    </section>
+  </main>
+
+  <main id="app-screen" class="layout hidden">
+    <section class="panel">
+      <h2 id="editor-title">Editeur de contrat</h2>
+      <form id="contract-form" class="stack">
+        <label>
+          <span id="contract-title-label">Titre du contrat</span>
+          <input type="text" id="title" required>
+        </label>
+
+        <div class="grid two">
+          <label>
+            <span id="client-name-label">Nom client</span>
+            <input type="text" id="clientName" value="Societe BMK" required>
+          </label>
+          <label>
+            <span id="client-contact-label">Contact client</span>
+            <input type="text" id="clientContact" value="+243 820 001 470 / +243 852 554 135">
+          </label>
+        </div>
+
+        <div class="grid two">
+          <label>
+            <span id="project-amount-label">Montant projet (USD)</span>
+            <input type="number" id="projectAmount" min="0" value="1700">
+          </label>
+          <label>
+            <span id="signature-date-label">Date de signature</span>
+            <input type="date" id="signatureDate">
+          </label>
+        </div>
+
+        <label>
+          <span id="design-scope-label">Contenu conception / engagement</span>
+          <textarea id="designScope" rows="9" required></textarea>
+        </label>
+
+        <label>
+          <span id="contract-terms-label">Clauses du contrat</span>
+          <textarea id="contractTerms" rows="12" required></textarea>
+        </label>
+
+        <div class="actions">
+          <button id="publish-btn" type="submit">Publier le contrat</button>
+          <button id="save-template-btn" type="button" class="secondary">Enregistrer comme modele</button>
+          <button id="export-btn" type="button" class="secondary">Exporter en texte</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2 id="published-title">Contrats publies</h2>
+      <div id="contracts-list" class="contracts-list"></div>
+    </section>
+  </main>
+
+  <template id="contract-card-template">
+    <article class="contract-card">
+      <div class="card-head">
+        <div>
+          <h3 class="contract-title"></h3>
+          <p class="contract-meta"></p>
+        </div>
+        <button class="load-btn secondary">Charger</button>
+      </div>
+
+      <details>
+        <summary>Voir le contenu</summary>
+        <h4>Conception</h4>
+        <pre class="scope-content"></pre>
+        <h4>Contrat</h4>
+        <pre class="terms-content"></pre>
+      </details>
+
+      <section class="comments-box">
+        <h4>Commentaires client (texte + photo)</h4>
+        <form class="comment-form stack">
+          <label>
+            Nom
+            <input type="text" class="comment-author" placeholder="Client ou responsable" required>
+          </label>
+          <label>
+            Commentaire
+            <textarea class="comment-text" rows="3" placeholder="Votre retour..." required></textarea>
+          </label>
+          <label>
+            Joindre une photo (optionnel)
+            <input type="file" class="comment-photo" accept="image/*">
+          </label>
+          <button type="submit">Ajouter commentaire</button>
+        </form>
+        <div class="comments-list"></div>
+      </section>
+    </article>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>

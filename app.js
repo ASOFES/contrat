@@ -114,6 +114,7 @@ const i18n = {
     requiredFields: "Tous les champs sont obligatoires.",
     accountExists: "Ce compte existe deja pour cette societe.",
     badCredentials: "Informations de connexion invalides.",
+    bmkLoaded: "Projet BMK precharge dans ce profil (modele + contrat publie).",
     companyExample: "Ex: Societe Client",
     fullnameExample: "Ex: Jean Kasongo",
     exportFileFallback: "contrat"
@@ -170,6 +171,7 @@ const i18n = {
     requiredFields: "All fields are required.",
     accountExists: "This account already exists for this company.",
     badCredentials: "Invalid login credentials.",
+    bmkLoaded: "BMK project preloaded in this profile (template + published contract).",
     companyExample: "Ex: Client Company",
     fullnameExample: "Ex: John Doe",
     exportFileFallback: "contract"
@@ -236,8 +238,89 @@ const defaultContractTerms = [
   "Article 8 - Confidentialite et propriete intellectuelle."
 ].join("\n");
 
+const bmkDesignScope = [
+  "Projet: Systeme integre de gestion d'une menuiserie moderne.",
+  "",
+  "Vision et objectifs:",
+  "- Centraliser le cycle complet commande client (vente jusqu'a cloture).",
+  "- Suivi temps reel des etapes et des delais.",
+  "- Lier stock, production et finance dans un flux unique.",
+  "- Donner au client un portail de suivi clair.",
+  "",
+  "Perimetre fonctionnel:",
+  "- Clients, devis, commandes, validation, paiements.",
+  "- Validation technique des mesures et cutting list.",
+  "- Production: cutting, edging, montage usine.",
+  "- Livraison, montage client, reception, archivage.",
+  "- Stock (sorties/restes), finance (acomptes/solde), commentaires et historique.",
+  "",
+  "Workflow officiel:",
+  "1. Vente / devis",
+  "2. Acceptation client",
+  "3. Paiement (total ou acompte 70%)",
+  "4. Mesures techniques validees",
+  "5. Cutting list",
+  "6. Cutting",
+  "7. Edging",
+  "8. Montage usine",
+  "9. Livraison",
+  "10. Montage chez client",
+  "11. Reception",
+  "12. Cloture et archivage",
+  "",
+  "Suivi obligatoire par etape:",
+  "- Quantite prevue / realisee",
+  "- Dates prevues / reelles",
+  "- Responsable, statut, commentaire",
+  "- Gestion des retards avec motif + nouvelle date"
+].join("\n");
+
+const bmkContractTerms = [
+  "CONTRAT DE PRESTATION - DOSSIER BMK",
+  "",
+  "Prestataire: ASOFES (Toto Mulumba)",
+  "Client: Societe BMK",
+  "",
+  "Article 1 - Objet:",
+  "Conception et livraison d'une application de gestion complete pour menuiserie moderne.",
+  "",
+  "Article 2 - Duree previsionnelle:",
+  "4 a 5 semaines a compter du demarrage.",
+  "",
+  "Article 3 - Lots:",
+  "- Lot 1: portail client, commandes, paiement, suivi de base",
+  "- Lot 2: cutting list, production, stock magasin",
+  "- Lot 3: livraison, finance avancee, tableaux de bord, commentaires complets",
+  "",
+  "Article 4 - Prix:",
+  "Montant total: 1 700 USD",
+  "- Lot 1: 750 USD",
+  "- Lot 2: 375 USD",
+  "- Lot 3: 375 USD",
+  "",
+  "Article 5 - Paiements:",
+  "- 50% a la signature: 750 USD",
+  "- 25% apres validation Lot 1: 375 USD",
+  "- 25% a la livraison finale: 375 USD",
+  "",
+  "Article 6 - Maintenance et hebergement:",
+  "- Maintenance/support: 150 USD / mois",
+  "- Hebergement: 50 USD / mois",
+  "- Total mensuel: 200 USD / mois",
+  "",
+  "Article 7 - Clauses:",
+  "- Confidentialite mutuelle",
+  "- Validation par lot",
+  "- Proprietes transferees apres paiement integral",
+  "- Hors perimetre facture via devis complementaire"
+].join("\n");
+
 function slugCompanyName(name) {
   return name.toLowerCase().trim().replace(/\s+/g, "-");
+}
+
+function isBMKCompany(name) {
+  return name.toLowerCase().includes("bmk");
 }
 
 function readUsers() {
@@ -275,6 +358,35 @@ function updateCompanyStore(companyId, nextStore) {
   const db = readDb();
   db[companyId] = nextStore;
   writeDb(db);
+}
+
+function seedBMKProjectIfNeeded(companyId, companyName) {
+  if (!isBMKCompany(companyName)) return false;
+
+  const store = getCompanyStore(companyId);
+  if (store.template || store.contracts.length) return false;
+
+  const starterTemplate = {
+    title: "Projet menuiserie moderne - BMK",
+    clientName: "Societe BMK",
+    clientContact: "+243 820 001 470 / +243 852 554 135",
+    projectAmount: 1700,
+    signatureDate: "",
+    designScope: bmkDesignScope,
+    contractTerms: bmkContractTerms
+  };
+
+  store.template = starterTemplate;
+  store.contracts = [
+    {
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      comments: [],
+      ...starterTemplate
+    }
+  ];
+  updateCompanyStore(companyId, store);
+  return true;
 }
 
 function readContracts() {
@@ -552,7 +664,7 @@ function registerUser(event) {
   });
   writeUsers(users);
 
-  getCompanyStore(companyId);
+  const wasSeeded = seedBMKProjectIfNeeded(companyId, companyName);
 
   setSession({
     userId: users[users.length - 1].id,
@@ -561,6 +673,8 @@ function registerUser(event) {
     fullName,
     email
   });
+
+  if (wasSeeded) alert(t("bmkLoaded"));
 }
 
 function loginUser(event) {
@@ -581,6 +695,8 @@ function loginUser(event) {
     return;
   }
 
+  const wasSeeded = seedBMKProjectIfNeeded(user.companyId, user.companyName);
+
   setSession({
     userId: user.id,
     companyId: user.companyId,
@@ -588,6 +704,8 @@ function loginUser(event) {
     fullName: user.fullName,
     email: user.email
   });
+
+  if (wasSeeded) alert(t("bmkLoaded"));
 }
 
 function logoutUser() {

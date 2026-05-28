@@ -97,9 +97,9 @@ const i18n = {
     saveTemplateBtn: "Enregistrer comme modele",
     exportBtn: "Exporter en texte",
     exportA4Btn: "Exporter A4 (PDF)",
-    publishedTitle: "Contrats publies",
+    publishedTitle: "Contrats publiés",
     readingMenuTitle: "Menu de lecture",
-    readingMenuHelp: "Ouvrez un contrat puis utilisez ce sommaire lateral.",
+    readingMenuHelp: "Ouvrez un contrat puis utilisez ce sommaire latéral.",
     readingIndex: "Index de lecture",
     loadBtn: "Charger",
     viewContent: "Voir le contenu",
@@ -548,7 +548,8 @@ function slugCompanyName(name) {
 }
 
 function isBMKCompany(name) {
-  return name.toLowerCase().includes("bmk");
+  const normalized = name.toLowerCase();
+  return normalized.includes("bmk") || normalized.includes("bkm");
 }
 
 function readUsers() {
@@ -1084,6 +1085,7 @@ function updateVisibilityBySession() {
 
   els.sessionInfo.textContent = `${currentSession.fullName} | ${currentSession.companyName}`;
   els.subtitle.textContent = t("topbarLoggedIn")(currentSession.companyName);
+  seedBMKProjectIfNeeded(currentSession.companyId, currentSession.companyName);
   setEditorVisible(false);
   loadTemplate();
   renderContracts();

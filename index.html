@@ -51,56 +51,43 @@
     </div>
   </section>
 
-  <main id="auth-screen" class="layout auth-layout">
-    <section class="panel">
-      <h2 id="register-title">Créer un compte client</h2>
-      <form id="register-form" class="stack">
-        <label>
-          <span id="register-company-label">Nom de la société</span>
-          <input type="text" id="register-company" placeholder="Ex. : Société Client" required>
-        </label>
-        <label>
-          <span id="register-fullname-label">Votre nom</span>
-          <input type="text" id="register-fullname" placeholder="Ex: Jean Kasongo" required>
-        </label>
-        <label>
-          <span id="register-email-label">E-mail (identifiant)</span>
-          <input type="email" id="register-email" required>
-        </label>
-        <label>
-          <span id="register-password-label">Mot de passe</span>
-          <input type="password" id="register-password" required>
-        </label>
-        <button id="register-submit-btn" type="submit">Créer mon compte</button>
-      </form>
-    </section>
-
-    <section class="panel">
-      <h2 id="login-title">Connexion client</h2>
-      <form id="login-form" class="stack">
-        <label>
-          <span id="login-company-label">Nom de la société</span>
-          <input type="text" id="login-company" required>
-        </label>
-        <label>
-          <span id="login-email-label">E-mail</span>
-          <input type="email" id="login-email" required>
-        </label>
-        <label>
-          <span id="login-password-label">Mot de passe</span>
-          <input type="password" id="login-password" required>
-        </label>
-        <button id="login-submit-btn" type="submit">Se connecter</button>
-      </form>
-      <p id="shared-note" class="muted">Même société = même aperçu du profil, des contrats, du projet et des commentaires.</p>
-      <div class="trust-card">
-        <h3>Pourquoi ASOFES ?</h3>
-        <ul>
-          <li>Publication rapide des contrats</li>
-          <li>Commentaires clients en texte + photo</li>
-          <li>Modèle réutilisable pour les prochains dossiers</li>
-        </ul>
+  <main id="auth-screen" class="auth-single-wrap">
+    <section class="auth-single-card">
+      <div class="auth-brand">
+        <div class="auth-logo">A</div>
+        <h2 id="auth-title">Connexion client</h2>
+        <p id="auth-subtitle">Accédez à votre espace contrat ASOFES</p>
       </div>
+
+      <form id="auth-form" class="stack">
+        <label>
+          <span id="auth-company-label">Nom de la société</span>
+          <input type="text" id="auth-company" placeholder="Ex. : Société Client" required>
+        </label>
+
+        <label id="auth-fullname-wrap" class="hidden">
+          <span id="auth-fullname-label">Votre nom complet</span>
+          <input type="text" id="auth-fullname" placeholder="Ex. : Jean Kasongo">
+        </label>
+
+        <label>
+          <span id="auth-email-label">E-mail</span>
+          <input type="email" id="auth-email" required>
+        </label>
+
+        <label>
+          <span id="auth-password-label">Mot de passe</span>
+          <input type="password" id="auth-password" required>
+        </label>
+
+        <button id="auth-submit-btn" type="submit">Se connecter</button>
+      </form>
+
+      <p id="shared-note" class="muted auth-note">Même société = même aperçu du profil, des contrats, du projet et des commentaires.</p>
+      <p class="auth-toggle-line">
+        <span id="auth-toggle-prefix">Première visite ?</span>
+        <button id="auth-toggle-btn" class="auth-link-btn" type="button">Créer un compte</button>
+      </p>
     </section>
   </main>
 

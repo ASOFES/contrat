@@ -6,22 +6,20 @@ const LANGUAGE_KEY = "client_portal_language_v1";
 const els = {
   authScreen: document.getElementById("auth-screen"),
   appScreen: document.getElementById("app-screen"),
-  registerForm: document.getElementById("register-form"),
-  loginForm: document.getElementById("login-form"),
+  authForm: document.getElementById("auth-form"),
+  authTitle: document.getElementById("auth-title"),
+  authSubtitle: document.getElementById("auth-subtitle"),
+  authCompanyLabel: document.getElementById("auth-company-label"),
+  authFullnameWrap: document.getElementById("auth-fullname-wrap"),
+  authFullnameLabel: document.getElementById("auth-fullname-label"),
+  authEmailLabel: document.getElementById("auth-email-label"),
+  authPasswordLabel: document.getElementById("auth-password-label"),
+  authSubmitBtn: document.getElementById("auth-submit-btn"),
+  authTogglePrefix: document.getElementById("auth-toggle-prefix"),
+  authToggleBtn: document.getElementById("auth-toggle-btn"),
   languageSwitch: document.getElementById("language-switch"),
   appTitle: document.getElementById("app-title"),
   languageLabel: document.getElementById("language-label"),
-  registerTitle: document.getElementById("register-title"),
-  registerCompanyLabel: document.getElementById("register-company-label"),
-  registerFullnameLabel: document.getElementById("register-fullname-label"),
-  registerEmailLabel: document.getElementById("register-email-label"),
-  registerPasswordLabel: document.getElementById("register-password-label"),
-  registerSubmitBtn: document.getElementById("register-submit-btn"),
-  loginTitle: document.getElementById("login-title"),
-  loginCompanyLabel: document.getElementById("login-company-label"),
-  loginEmailLabel: document.getElementById("login-email-label"),
-  loginPasswordLabel: document.getElementById("login-password-label"),
-  loginSubmitBtn: document.getElementById("login-submit-btn"),
   sharedNote: document.getElementById("shared-note"),
   editorTitle: document.getElementById("editor-title"),
   editorPanel: document.getElementById("editor-panel"),
@@ -34,13 +32,10 @@ const els = {
   contractTermsLabel: document.getElementById("contract-terms-label"),
   publishBtn: document.getElementById("publish-btn"),
   publishedTitle: document.getElementById("published-title"),
-  registerCompany: document.getElementById("register-company"),
-  registerFullname: document.getElementById("register-fullname"),
-  registerEmail: document.getElementById("register-email"),
-  registerPassword: document.getElementById("register-password"),
-  loginCompany: document.getElementById("login-company"),
-  loginEmail: document.getElementById("login-email"),
-  loginPassword: document.getElementById("login-password"),
+  authCompany: document.getElementById("auth-company"),
+  authFullname: document.getElementById("auth-fullname"),
+  authEmail: document.getElementById("auth-email"),
+  authPassword: document.getElementById("auth-password"),
   sessionInfo: document.getElementById("session-info"),
   subtitle: document.getElementById("topbar-subtitle"),
   logoutBtn: document.getElementById("logout-btn"),
@@ -62,6 +57,7 @@ const els = {
 
 let currentSession = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
 let currentLanguage = localStorage.getItem(LANGUAGE_KEY) || "fr";
+let authMode = "login";
 
 const i18n = {
   fr: {
@@ -71,17 +67,20 @@ const i18n = {
     topbarLoggedIn: (company) => `Societe active: ${company}`,
     newContractBtn: "Nouveau contrat depuis modele",
     logoutBtn: "Deconnexion",
-    registerTitle: "Creer un compte client",
-    registerCompanyLabel: "Nom de la societe",
-    registerFullnameLabel: "Votre nom",
-    registerEmailLabel: "Email (identifiant)",
-    registerPasswordLabel: "Mot de passe",
-    registerSubmitBtn: "Creer mon compte",
     loginTitle: "Connexion client",
-    loginCompanyLabel: "Nom de la societe",
-    loginEmailLabel: "Email",
-    loginPasswordLabel: "Mot de passe",
-    loginSubmitBtn: "Se connecter",
+    registerTitle: "Créer un compte client",
+    authSubtitleLogin: "Accédez à votre espace contrat ASOFES",
+    authSubtitleRegister: "Créez votre accès client en quelques secondes",
+    authCompanyLabel: "Nom de la société",
+    authFullnameLabel: "Votre nom complet",
+    authEmailLabel: "E-mail",
+    authPasswordLabel: "Mot de passe",
+    authSubmitLogin: "Se connecter",
+    authSubmitRegister: "Créer mon compte",
+    authTogglePrefixLogin: "Première visite ?",
+    authToggleActionLogin: "Créer un compte",
+    authTogglePrefixRegister: "Déjà inscrit ?",
+    authToggleActionRegister: "Se connecter",
     sharedNote: "Meme societe = meme apercu profil, contrats, projet et commentaires.",
     editorTitle: "Editeur de contrat",
     contractTitleLabel: "Titre du contrat",
@@ -130,17 +129,20 @@ const i18n = {
     topbarLoggedIn: (company) => `Active company: ${company}`,
     newContractBtn: "New contract from template",
     logoutBtn: "Log out",
-    registerTitle: "Create client account",
-    registerCompanyLabel: "Company name",
-    registerFullnameLabel: "Your name",
-    registerEmailLabel: "Email (login)",
-    registerPasswordLabel: "Password",
-    registerSubmitBtn: "Create account",
     loginTitle: "Client login",
-    loginCompanyLabel: "Company name",
-    loginEmailLabel: "Email",
-    loginPasswordLabel: "Password",
-    loginSubmitBtn: "Sign in",
+    registerTitle: "Create client account",
+    authSubtitleLogin: "Access your ASOFES contract workspace",
+    authSubtitleRegister: "Create your client access in seconds",
+    authCompanyLabel: "Company name",
+    authFullnameLabel: "Your full name",
+    authEmailLabel: "Email",
+    authPasswordLabel: "Password",
+    authSubmitLogin: "Sign in",
+    authSubmitRegister: "Create account",
+    authTogglePrefixLogin: "First visit?",
+    authToggleActionLogin: "Create account",
+    authTogglePrefixRegister: "Already registered?",
+    authToggleActionRegister: "Sign in",
     sharedNote: "Same company = same profile view, contracts, project and comments.",
     editorTitle: "Contract editor",
     contractTitleLabel: "Contract title",
@@ -195,17 +197,11 @@ function applyLanguage() {
   els.languageLabel.textContent = t("languageLabel");
   els.newContractBtn.textContent = t("newContractBtn");
   els.logoutBtn.textContent = t("logoutBtn");
-  els.registerTitle.textContent = t("registerTitle");
-  els.registerCompanyLabel.textContent = t("registerCompanyLabel");
-  els.registerFullnameLabel.textContent = t("registerFullnameLabel");
-  els.registerEmailLabel.textContent = t("registerEmailLabel");
-  els.registerPasswordLabel.textContent = t("registerPasswordLabel");
-  els.registerSubmitBtn.textContent = t("registerSubmitBtn");
-  els.loginTitle.textContent = t("loginTitle");
-  els.loginCompanyLabel.textContent = t("loginCompanyLabel");
-  els.loginEmailLabel.textContent = t("loginEmailLabel");
-  els.loginPasswordLabel.textContent = t("loginPasswordLabel");
-  els.loginSubmitBtn.textContent = t("loginSubmitBtn");
+  applyAuthModeText();
+  els.authCompanyLabel.textContent = t("authCompanyLabel");
+  els.authFullnameLabel.textContent = t("authFullnameLabel");
+  els.authEmailLabel.textContent = t("authEmailLabel");
+  els.authPasswordLabel.textContent = t("authPasswordLabel");
   els.sharedNote.textContent = t("sharedNote");
   els.editorTitle.textContent = t("editorTitle");
   els.contractTitleLabel.textContent = t("contractTitleLabel");
@@ -220,10 +216,25 @@ function applyLanguage() {
   els.exportBtn.textContent = t("exportBtn");
   els.exportA4Btn.textContent = t("exportA4Btn");
   els.publishedTitle.textContent = t("publishedTitle");
-  els.registerCompany.placeholder = t("companyExample");
-  els.registerFullname.placeholder = t("fullnameExample");
+  els.authCompany.placeholder = t("companyExample");
+  els.authFullname.placeholder = t("fullnameExample");
   updateVisibilityBySession();
   if (currentSession) renderContracts();
+}
+
+function applyAuthModeText() {
+  const isRegister = authMode === "register";
+  els.authTitle.textContent = isRegister ? t("registerTitle") : t("loginTitle");
+  els.authSubtitle.textContent = isRegister ? t("authSubtitleRegister") : t("authSubtitleLogin");
+  els.authSubmitBtn.textContent = isRegister ? t("authSubmitRegister") : t("authSubmitLogin");
+  els.authTogglePrefix.textContent = isRegister
+    ? t("authTogglePrefixRegister")
+    : t("authTogglePrefixLogin");
+  els.authToggleBtn.textContent = isRegister
+    ? t("authToggleActionRegister")
+    : t("authToggleActionLogin");
+  els.authFullnameWrap.classList.toggle("hidden", !isRegister);
+  els.authFullname.required = isRegister;
 }
 
 const defaultDesignScope = [
@@ -1057,12 +1068,10 @@ function updateVisibilityBySession() {
 }
 
 function registerUser(event) {
-  event.preventDefault();
-
-  const companyName = els.registerCompany.value.trim();
-  const fullName = els.registerFullname.value.trim();
-  const email = els.registerEmail.value.trim().toLowerCase();
-  const password = els.registerPassword.value.trim();
+  const companyName = els.authCompany.value.trim();
+  const fullName = els.authFullname.value.trim();
+  const email = els.authEmail.value.trim().toLowerCase();
+  const password = els.authPassword.value.trim();
 
   if (!companyName || !fullName || !email || !password) {
     alert(t("requiredFields"));
@@ -1102,11 +1111,9 @@ function registerUser(event) {
 }
 
 function loginUser(event) {
-  event.preventDefault();
-
-  const companyName = els.loginCompany.value.trim();
-  const email = els.loginEmail.value.trim().toLowerCase();
-  const password = els.loginPassword.value.trim();
+  const companyName = els.authCompany.value.trim();
+  const email = els.authEmail.value.trim().toLowerCase();
+  const password = els.authPassword.value.trim();
   const companyId = slugCompanyName(companyName);
 
   const users = readUsers();
@@ -1142,13 +1149,27 @@ function switchLanguage(event) {
   applyLanguage();
 }
 
+function handleAuthSubmit(event) {
+  event.preventDefault();
+  if (authMode === "register") {
+    registerUser();
+  } else {
+    loginUser();
+  }
+}
+
+function toggleAuthMode() {
+  authMode = authMode === "login" ? "register" : "login";
+  applyAuthModeText();
+}
+
 els.form.addEventListener("submit", publishContract);
 els.saveTemplateBtn.addEventListener("click", saveTemplateFromCurrentForm);
 els.newContractBtn.addEventListener("click", loadNewContractFromButton);
 els.exportBtn.addEventListener("click", exportCurrentContractAsText);
 els.exportA4Btn.addEventListener("click", exportCurrentContractA4);
-els.registerForm.addEventListener("submit", registerUser);
-els.loginForm.addEventListener("submit", loginUser);
+els.authForm.addEventListener("submit", handleAuthSubmit);
+els.authToggleBtn.addEventListener("click", toggleAuthMode);
 els.logoutBtn.addEventListener("click", logoutUser);
 els.languageSwitch.addEventListener("change", switchLanguage);
 

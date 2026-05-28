@@ -15,6 +15,7 @@ const els = {
   authEmailLabel: document.getElementById("auth-email-label"),
   authPasswordLabel: document.getElementById("auth-password-label"),
   authSubmitBtn: document.getElementById("auth-submit-btn"),
+  authMessage: document.getElementById("auth-message"),
   authTogglePrefix: document.getElementById("auth-toggle-prefix"),
   authToggleBtn: document.getElementById("auth-toggle-btn"),
   languageSwitch: document.getElementById("language-switch"),
@@ -125,8 +126,11 @@ const i18n = {
     requiredComment: "Le nom et le commentaire sont obligatoires.",
     requiredFields: "Tous les champs sont obligatoires.",
     accountExists: "Ce compte existe deja pour cette societe.",
-    badCredentials: "Informations de connexion invalides.",
+    badCredentials: "Informations de connexion invalides. Verifiez societe BMK, e-mail et mot de passe.",
+    companyRequired: "Indiquez le nom de la societe (ex: BMK).",
+    noAccountHint: "Aucun compte trouve. Cliquez sur Creer un compte avec la societe BMK.",
     bmkLoaded: "Projet BMK precharge dans ce profil (modele + contrat publie).",
+    emptyWorkspace: "Aucun contrat visible. Cliquez sur Nouveau contrat depuis modele.",
     companyExample: "BMK",
     fullnameExample: "Ex: Jean Kasongo",
     exportFileFallback: "contrat"
@@ -191,8 +195,11 @@ const i18n = {
     requiredComment: "Name and comment are required.",
     requiredFields: "All fields are required.",
     accountExists: "This account already exists for this company.",
-    badCredentials: "Invalid login credentials.",
+    badCredentials: "Invalid login credentials. Check company BMK, email and password.",
+    companyRequired: "Enter your company name (e.g. BMK).",
+    noAccountHint: "No account found. Click Create account with company BMK.",
     bmkLoaded: "BMK project preloaded in this profile (template + published contract).",
+    emptyWorkspace: "No contract visible yet. Click New contract from template.",
     companyExample: "BMK",
     fullnameExample: "Ex: John Doe",
     exportFileFallback: "contract"
@@ -201,6 +208,26 @@ const i18n = {
 
 function t(key) {
   return i18n[currentLanguage][key];
+}
+
+function showAuthMessage(message, type = "error") {
+  if (!els.authMessage) return;
+  els.authMessage.textContent = message;
+  els.authMessage.classList.remove("hidden", "error", "success");
+  els.authMessage.classList.add(type);
+}
+
+function clearAuthMessage() {
+  if (!els.authMessage) return;
+  els.authMessage.textContent = "";
+  els.authMessage.classList.add("hidden");
+  els.authMessage.classList.remove("error", "success");
+}
+
+function ensureDefaultCompanyField() {
+  if (!els.authCompany.value.trim()) {
+    els.authCompany.value = "BMK";
+  }
 }
 
 function applyLanguage() {
@@ -235,6 +262,7 @@ function applyLanguage() {
   els.readingMenuHelp.textContent = t("readingMenuHelp");
   els.authCompany.placeholder = t("companyExample");
   els.authFullname.placeholder = t("fullnameExample");
+  ensureDefaultCompanyField();
   updateVisibilityBySession();
   if (currentSession) renderContracts();
 }
@@ -875,31 +903,29 @@ function updateCompanyStore(companyId, nextStore) {
   writeDb(db);
 }
 
+function isBMKDossierTitle(title) {
+  return title === "Dossier Complet Unifie - BMK" || title === "Unified Master Dossier - BMK";
+}
+
 function seedBMKProjectIfNeeded(companyId, companyName) {
   if (!isBMKCompany(companyName)) return false;
 
   const store = getCompanyStore(companyId);
-  const isOutdated =
+  const starterTemplate = getBMKStarterTemplate();
+  let changed = false;
+
+  const scopeText = store.template?.designScope || "";
+  const needsTemplateUpdate =
     !store.template ||
-    !store.template.designScope ||
-    !store.template.designScope.includes("Dossier Complet Unifie");
+    !scopeText ||
+    (!scopeText.includes("Dossier Complet Unifie") && !scopeText.includes("Unified Master Dossier"));
 
-  if (!isOutdated) return false;
+  if (needsTemplateUpdate) {
+    store.template = { ...starterTemplate };
+    changed = true;
+  }
 
-  const starterTemplate = {
-    title: "Dossier Complet Unifie - BMK",
-    clientName: "Societe BMK",
-    clientContact: "+243 820 001 470 / +243 852 554 135",
-    projectAmount: 1700,
-    signatureDate: "",
-    designScope: bmkDesignScope,
-    contractTerms: bmkContractTerms
-  };
-
-  store.template = starterTemplate;
-  const hasUnifiedContract = store.contracts.some(
-    (contract) => contract.title === "Dossier Complet Unifie - BMK"
-  );
+  const hasUnifiedContract = store.contracts.some((contract) => isBMKDossierTitle(contract.title));
   if (!hasUnifiedContract) {
     store.contracts.unshift({
       id: crypto.randomUUID(),
@@ -907,9 +933,11 @@ function seedBMKProjectIfNeeded(companyId, companyName) {
       comments: [],
       ...starterTemplate
     });
+    changed = true;
   }
-  updateCompanyStore(companyId, store);
-  return true;
+
+  if (changed) updateCompanyStore(companyId, store);
+  return changed;
 }
 
 function readContracts() {
@@ -1024,10 +1052,7 @@ function syncBMKLanguageContentForSession() {
 }
 
 function isBMKDossierContract(contract) {
-  return (
-    contract.title === "Dossier Complet Unifie - BMK" ||
-    contract.title === "Unified Master Dossier - BMK"
-  );
+  return isBMKDossierTitle(contract.title);
 }
 
 function getLocalizedContract(contract) {
@@ -1405,6 +1430,12 @@ function renderContracts() {
       .map((item) => `<li><a href="#${item.id}">${escapeHtml(item.label)}</a></li>`)
       .join("");
   }
+
+  const firstCard = els.contractsList.querySelector(".content-details");
+  if (firstCard && !firstCard.open) {
+    firstCard.open = true;
+    firstCard.dispatchEvent(new Event("toggle"));
+  }
 }
 
 function setSession(session) {
@@ -1424,6 +1455,8 @@ function setEditorVisible(visible) {
 
 function updateVisibilityBySession() {
   const connected = Boolean(currentSession);
+  document.body.classList.toggle("session-active", connected);
+  document.body.classList.toggle("auth-mode", !connected);
   els.authScreen.classList.toggle("hidden", connected);
   els.appScreen.classList.toggle("hidden", !connected);
   els.logoutBtn.classList.toggle("hidden", !connected);
@@ -1433,15 +1466,22 @@ function updateVisibilityBySession() {
     els.sessionInfo.textContent = "";
     els.subtitle.textContent = t("topbarLoggedOut");
     setEditorVisible(false);
+    ensureDefaultCompanyField();
     return;
   }
 
+  clearAuthMessage();
   els.sessionInfo.textContent = `${currentSession.fullName} | ${currentSession.companyName}`;
   els.subtitle.textContent = t("topbarLoggedIn")(currentSession.companyName);
   seedBMKProjectIfNeeded(currentSession.companyId, currentSession.companyName);
   setEditorVisible(false);
   loadTemplate();
-  renderContracts();
+  try {
+    renderContracts();
+  } catch (error) {
+    console.error(error);
+    els.contractsList.innerHTML = `<p class="muted">${t("emptyWorkspace")}</p>`;
+  }
 }
 
 function registerUser(event) {
@@ -1451,7 +1491,7 @@ function registerUser(event) {
   const password = els.authPassword.value.trim();
 
   if (!companyName || !fullName || !email || !password) {
-    alert(t("requiredFields"));
+    showAuthMessage(t("requiredFields"), "error");
     return;
   }
 
@@ -1460,7 +1500,7 @@ function registerUser(event) {
   const exists = users.some((u) => u.companyId === companyId && u.email === email);
 
   if (exists) {
-    alert(t("accountExists"));
+    showAuthMessage(t("accountExists"), "error");
     return;
   }
 
@@ -1484,22 +1524,28 @@ function registerUser(event) {
     email
   });
 
-  if (wasSeeded) alert(t("bmkLoaded"));
+  if (wasSeeded) showAuthMessage(t("bmkLoaded"), "success");
 }
 
 function loginUser(event) {
   const companyName = els.authCompany.value.trim();
   const email = els.authEmail.value.trim().toLowerCase();
   const password = els.authPassword.value.trim();
-  const companyId = slugCompanyName(companyName);
 
+  if (!companyName) {
+    showAuthMessage(t("companyRequired"), "error");
+    return;
+  }
+
+  const companyId = slugCompanyName(companyName);
   const users = readUsers();
   const user = users.find(
     (u) => u.companyId === companyId && u.email === email && u.password === password
   );
 
   if (!user) {
-    alert(t("badCredentials"));
+    const hasAnyAccount = users.some((u) => u.email === email);
+    showAuthMessage(hasAnyAccount ? t("badCredentials") : t("noAccountHint"), "error");
     return;
   }
 
@@ -1513,7 +1559,7 @@ function loginUser(event) {
     email: user.email
   });
 
-  if (wasSeeded) alert(t("bmkLoaded"));
+  if (wasSeeded) showAuthMessage(t("bmkLoaded"), "success");
 }
 
 function logoutUser() {
@@ -1529,6 +1575,7 @@ function switchLanguage(event) {
 
 function handleAuthSubmit(event) {
   event.preventDefault();
+  clearAuthMessage();
   if (authMode === "register") {
     registerUser();
   } else {
@@ -1538,7 +1585,9 @@ function handleAuthSubmit(event) {
 
 function toggleAuthMode() {
   authMode = authMode === "login" ? "register" : "login";
+  clearAuthMessage();
   applyAuthModeText();
+  ensureDefaultCompanyField();
 }
 
 function closeEditorPanel() {
@@ -1564,5 +1613,6 @@ els.authToggleBtn.addEventListener("click", toggleAuthMode);
 els.logoutBtn.addEventListener("click", logoutUser);
 els.languageSwitch.addEventListener("change", switchLanguage);
 
+ensureDefaultCompanyField();
 applyLanguage();
 updateVisibilityBySession();

@@ -52,6 +52,9 @@ const els = {
   newContractBtn: document.getElementById("new-contract-btn"),
   exportBtn: document.getElementById("export-btn"),
   exportA4Btn: document.getElementById("export-a4-btn"),
+  readingMenuTitle: document.getElementById("reading-menu-title"),
+  readingMenuHelp: document.getElementById("reading-menu-help"),
+  readingMenuList: document.getElementById("reading-menu-list"),
   cardTemplate: document.getElementById("contract-card-template")
 };
 
@@ -95,6 +98,8 @@ const i18n = {
     exportBtn: "Exporter en texte",
     exportA4Btn: "Exporter A4 (PDF)",
     publishedTitle: "Contrats publies",
+    readingMenuTitle: "Menu de lecture",
+    readingMenuHelp: "Ouvrez un contrat puis utilisez ce sommaire lateral.",
     readingIndex: "Index de lecture",
     loadBtn: "Charger",
     viewContent: "Voir le contenu",
@@ -157,6 +162,8 @@ const i18n = {
     exportBtn: "Export as text",
     exportA4Btn: "Export A4 (PDF)",
     publishedTitle: "Published contracts",
+    readingMenuTitle: "Reading menu",
+    readingMenuHelp: "Open a contract then use this side index.",
     readingIndex: "Reading index",
     loadBtn: "Load",
     viewContent: "View content",
@@ -216,6 +223,8 @@ function applyLanguage() {
   els.exportBtn.textContent = t("exportBtn");
   els.exportA4Btn.textContent = t("exportA4Btn");
   els.publishedTitle.textContent = t("publishedTitle");
+  els.readingMenuTitle.textContent = t("readingMenuTitle");
+  els.readingMenuHelp.textContent = t("readingMenuHelp");
   els.authCompany.placeholder = t("companyExample");
   els.authFullname.placeholder = t("fullnameExample");
   updateVisibilityBySession();
@@ -961,11 +970,14 @@ function exportCurrentContractA4() {
 function renderContracts() {
   const contracts = readContracts();
   els.contractsList.innerHTML = "";
+  els.readingMenuList.innerHTML = "";
 
   if (!contracts.length) {
     els.contractsList.innerHTML = `<p class="muted">${t("noContracts")}</p>`;
     return;
   }
+
+  let firstIndex = null;
 
   contracts.forEach((contract) => {
     const fragment = els.cardTemplate.content.cloneNode(true);
@@ -991,7 +1003,6 @@ function renderContracts() {
     });
 
     fragment.querySelector("summary").textContent = t("viewContent");
-    fragment.querySelector(".index-title").textContent = t("readingIndex");
     const sectionTitles = fragment.querySelectorAll("h4");
     sectionTitles[0].textContent = t("conception");
     sectionTitles[1].textContent = t("contract");
@@ -1006,16 +1017,21 @@ function renderContracts() {
     commentText.placeholder = t("commentTextPlaceholder");
     fragment.querySelector(".comment-form button").textContent = t("commentBtn");
 
-    const indexLinks = fragment.querySelector(".index-links");
     const allIndex = [
       { id: scopeSection.id, label: t("conception") },
       ...scopeReadable.indexItems,
       { id: termsSection.id, label: t("contract") },
       ...termsReadable.indexItems
     ];
-    indexLinks.innerHTML = allIndex
-      .map((item) => `<li><a href="#${item.id}">${escapeHtml(item.label)}</a></li>`)
-      .join("");
+    if (!firstIndex) firstIndex = allIndex;
+
+    const detailsNode = fragment.querySelector(".content-details");
+    detailsNode.addEventListener("toggle", () => {
+      if (!detailsNode.open) return;
+      els.readingMenuList.innerHTML = allIndex
+        .map((item) => `<li><a href="#${item.id}">${escapeHtml(item.label)}</a></li>`)
+        .join("");
+    });
 
     const commentForm = fragment.querySelector(".comment-form");
     commentForm.addEventListener("submit", (e) => handleCommentSubmit(e, contract.id));
@@ -1029,6 +1045,12 @@ function renderContracts() {
 
     els.contractsList.appendChild(fragment);
   });
+
+  if (firstIndex) {
+    els.readingMenuList.innerHTML = firstIndex
+      .map((item) => `<li><a href="#${item.id}">${escapeHtml(item.label)}</a></li>`)
+      .join("");
+  }
 }
 
 function setSession(session) {

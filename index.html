@@ -145,6 +145,12 @@
       <h2 id="published-title">Contrats publiés</h2>
       <div id="contracts-list" class="contracts-list"></div>
     </section>
+
+    <aside id="reading-menu-panel" class="panel">
+      <h2 id="reading-menu-title">Menu de lecture</h2>
+      <p id="reading-menu-help" class="muted">Ouvrez un contrat puis utilisez ce sommaire latéral.</p>
+      <ol id="reading-menu-list" class="reading-menu-list"></ol>
+    </aside>
   </main>
 
   <template id="contract-card-template">
@@ -159,21 +165,15 @@
 
       <details class="content-details">
         <summary>Voir le contenu</summary>
-        <div class="content-reader">
-          <aside class="content-index">
-            <h5 class="index-title">Index</h5>
-            <ol class="index-links"></ol>
-          </aside>
-          <div class="content-body">
-            <section class="scope-section">
-              <h4>Conception</h4>
-              <div class="scope-content formatted-content"></div>
-            </section>
-            <section class="terms-section">
-              <h4>Contrat</h4>
-              <div class="terms-content formatted-content"></div>
-            </section>
-          </div>
+        <div class="content-body">
+          <section class="scope-section">
+            <h4>Conception</h4>
+            <div class="scope-content formatted-content"></div>
+          </section>
+          <section class="terms-section">
+            <h4>Contrat</h4>
+            <div class="terms-content formatted-content"></div>
+          </section>
         </div>
       </details>
 

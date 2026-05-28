@@ -1019,6 +1019,35 @@ function syncBMKLanguageContentForSession() {
   updateCompanyStore(currentSession.companyId, store);
 }
 
+function isBMKDossierContract(contract) {
+  return (
+    contract.title === "Dossier Complet Unifie - BMK" ||
+    contract.title === "Unified Master Dossier - BMK"
+  );
+}
+
+function getLocalizedContract(contract) {
+  if (!isBMKDossierContract(contract)) return contract;
+  if (currentLanguage === "en") {
+    return {
+      ...contract,
+      title: "Unified Master Dossier - BMK",
+      clientName: "Societe BMK",
+      clientContact: "+243 820 001 470 / +243 852 554 135",
+      designScope: bmkDesignScopeEn,
+      contractTerms: bmkContractTermsEn
+    };
+  }
+  return {
+    ...contract,
+    title: "Dossier Complet Unifie - BMK",
+    clientName: "Societe BMK",
+    clientContact: "+243 820 001 470 / +243 852 554 135",
+    designScope: bmkDesignScope,
+    contractTerms: bmkContractTerms
+  };
+}
+
 function loadNewContractFromButton() {
   requireSession();
   fillForm(getBMKStarterTemplate());
@@ -1309,25 +1338,26 @@ function renderContracts() {
   let firstIndex = null;
 
   contracts.forEach((contract) => {
+    const localizedContract = getLocalizedContract(contract);
     const fragment = els.cardTemplate.content.cloneNode(true);
-    fragment.querySelector(".contract-title").textContent = contract.title;
+    fragment.querySelector(".contract-title").textContent = localizedContract.title;
     fragment.querySelector(".contract-meta").textContent =
-      `${contract.clientName} | ${formatDate(contract.signatureDate)} | ${contract.projectAmount} USD`;
+      `${localizedContract.clientName} | ${formatDate(localizedContract.signatureDate)} | ${localizedContract.projectAmount} USD`;
     const scopeSection = fragment.querySelector(".scope-section");
     const termsSection = fragment.querySelector(".terms-section");
-    const safeId = createContentSlug(contract.id, crypto.randomUUID());
+    const safeId = createContentSlug(localizedContract.id, crypto.randomUUID());
     scopeSection.id = `scope-main-${safeId}`;
     termsSection.id = `terms-main-${safeId}`;
 
-    const scopeReadable = buildReadableContent(contract.designScope, `scope-${safeId}`);
-    const termsReadable = buildReadableContent(contract.contractTerms, `terms-${safeId}`);
+    const scopeReadable = buildReadableContent(localizedContract.designScope, `scope-${safeId}`);
+    const termsReadable = buildReadableContent(localizedContract.contractTerms, `terms-${safeId}`);
     fragment.querySelector(".scope-content").innerHTML = scopeReadable.html;
     fragment.querySelector(".terms-content").innerHTML = termsReadable.html;
 
     const loadBtn = fragment.querySelector(".load-btn");
     loadBtn.textContent = t("loadBtn");
     loadBtn.addEventListener("click", () => {
-      fillForm(contract);
+      fillForm(localizedContract);
       setEditorVisible(true);
     });
 
@@ -1363,13 +1393,13 @@ function renderContracts() {
     });
 
     const commentForm = fragment.querySelector(".comment-form");
-    commentForm.addEventListener("submit", (e) => handleCommentSubmit(e, contract.id));
+    commentForm.addEventListener("submit", (e) => handleCommentSubmit(e, localizedContract.id));
 
     const commentsList = fragment.querySelector(".comments-list");
-    if (!contract.comments.length) {
+    if (!localizedContract.comments.length) {
       commentsList.innerHTML = `<p class="muted">${t("noComments")}</p>`;
     } else {
-      contract.comments.forEach((comment) => commentsList.appendChild(renderComment(comment)));
+      localizedContract.comments.forEach((comment) => commentsList.appendChild(renderComment(comment)));
     }
 
     els.contractsList.appendChild(fragment);

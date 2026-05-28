@@ -85,6 +85,32 @@ body {
   max-width: 1320px;
 }
 
+#editor-panel {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 96px);
+  overflow: auto;
+  z-index: 20;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.28);
+}
+
+.editor-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.editor-head h2 {
+  margin-bottom: 0;
+}
+
+#editor-panel textarea {
+  max-height: 220px;
+}
+
 .pill {
   display: inline-block;
   padding: 0.24rem 0.6rem;
@@ -565,6 +591,13 @@ details {
 
   #reading-menu-panel {
     position: static;
+  }
+
+  #editor-panel {
+    top: 72px;
+    right: 8px;
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 84px);
   }
 }
 

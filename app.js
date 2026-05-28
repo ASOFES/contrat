@@ -23,6 +23,7 @@ const els = {
   sharedNote: document.getElementById("shared-note"),
   editorTitle: document.getElementById("editor-title"),
   editorPanel: document.getElementById("editor-panel"),
+  closeEditorBtn: document.getElementById("close-editor-btn"),
   contractTitleLabel: document.getElementById("contract-title-label"),
   clientNameLabel: document.getElementById("client-name-label"),
   clientContactLabel: document.getElementById("client-contact-label"),
@@ -95,6 +96,7 @@ const i18n = {
     contractTermsLabel: "Clauses du contrat",
     publishBtn: "Publier le contrat",
     saveTemplateBtn: "Enregistrer comme modele",
+    closeEditorBtn: "Fermer",
     exportBtn: "Exporter en texte",
     exportA4Btn: "Exporter A4 (PDF)",
     publishedTitle: "Contrats publiés",
@@ -159,6 +161,7 @@ const i18n = {
     contractTermsLabel: "Contract terms",
     publishBtn: "Publish contract",
     saveTemplateBtn: "Save as template",
+    closeEditorBtn: "Close",
     exportBtn: "Export as text",
     exportA4Btn: "Export A4 (PDF)",
     publishedTitle: "Published contracts",
@@ -220,6 +223,7 @@ function applyLanguage() {
   els.contractTermsLabel.textContent = t("contractTermsLabel");
   els.publishBtn.textContent = t("publishBtn");
   els.saveTemplateBtn.textContent = t("saveTemplateBtn");
+  els.closeEditorBtn.textContent = t("closeEditorBtn");
   els.exportBtn.textContent = t("exportBtn");
   els.exportA4Btn.textContent = t("exportA4Btn");
   els.publishedTitle.textContent = t("publishedTitle");
@@ -1187,11 +1191,16 @@ function toggleAuthMode() {
   applyAuthModeText();
 }
 
+function closeEditorPanel() {
+  setEditorVisible(false);
+}
+
 els.form.addEventListener("submit", publishContract);
 els.saveTemplateBtn.addEventListener("click", saveTemplateFromCurrentForm);
 els.newContractBtn.addEventListener("click", loadNewContractFromButton);
 els.exportBtn.addEventListener("click", exportCurrentContractAsText);
 els.exportA4Btn.addEventListener("click", exportCurrentContractA4);
+els.closeEditorBtn.addEventListener("click", closeEditorPanel);
 els.authForm.addEventListener("submit", handleAuthSubmit);
 els.authToggleBtn.addEventListener("click", toggleAuthMode);
 els.logoutBtn.addEventListener("click", logoutUser);

@@ -317,12 +317,93 @@ details {
   margin-top: 0.6rem;
 }
 
-pre {
-  white-space: pre-wrap;
+.content-details > summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.content-reader {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 0.8rem;
+}
+
+.content-index {
+  border: 1px solid #d4e3f5;
+  background: #f5f9ff;
+  border-radius: 10px;
+  padding: 0.65rem;
+  max-height: 420px;
+  overflow: auto;
+  position: sticky;
+  top: 12px;
+}
+
+.index-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.92rem;
+  color: #1e3a8a;
+}
+
+.index-links {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.index-links li {
+  margin: 0.24rem 0;
+  font-size: 0.86rem;
+}
+
+.index-links a {
+  color: #334155;
+  text-decoration: none;
+}
+
+.index-links a:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.content-body {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.formatted-content {
   background: #ebf2fb;
   border-radius: 10px;
   border: 1px solid #d4e3f5;
-  padding: 0.7rem;
+  padding: 0.75rem;
+}
+
+.formatted-content .content-heading {
+  margin: 0.55rem 0 0.35rem;
+  font-size: 0.95rem;
+  color: #1e3a8a;
+}
+
+.formatted-content .content-paragraph {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+}
+
+.formatted-content ul {
+  margin: 0.3rem 0 0.45rem;
+  padding-left: 1.15rem;
+}
+
+.formatted-content li {
+  margin: 0.16rem 0;
+  font-size: 0.9rem;
+}
+
+.formatted-content hr {
+  border: 0;
+  border-top: 1px dashed #b8c9e3;
+  margin: 0.55rem 0;
 }
 
 .comments-box {
@@ -397,6 +478,15 @@ pre {
 
   .grid.two {
     grid-template-columns: 1fr;
+  }
+
+  .content-reader {
+    grid-template-columns: 1fr;
+  }
+
+  .content-index {
+    position: static;
+    max-height: none;
   }
 }
 

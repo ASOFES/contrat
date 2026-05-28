@@ -95,6 +95,7 @@ const i18n = {
     exportBtn: "Exporter en texte",
     exportA4Btn: "Exporter A4 (PDF)",
     publishedTitle: "Contrats publies",
+    readingIndex: "Index de lecture",
     loadBtn: "Charger",
     viewContent: "Voir le contenu",
     conception: "Conception",
@@ -153,6 +154,7 @@ const i18n = {
     exportBtn: "Export as text",
     exportA4Btn: "Export A4 (PDF)",
     publishedTitle: "Published contracts",
+    readingIndex: "Reading index",
     loadBtn: "Load",
     viewContent: "View content",
     conception: "Design",
@@ -741,6 +743,82 @@ function renderComment(item) {
   return node;
 }
 
+function isContentHeading(line) {
+  return (
+    /^(\d+\)|\d+\.)\s+/.test(line) ||
+    /^Article\s+\d+/i.test(line) ||
+    /^Lot\s+\d+/i.test(line) ||
+    /^Signatures?\s*:?/i.test(line) ||
+    /^(Dossier Complet Unifie|Projet\s*:|Informations client|Informations commande|Execution atelier|Exécution atelier|Inclus|Exclu.*|CONTRAT DE PRESTATION.*|Objectifs du projet|Perimetre global|Périmètre global)$/i.test(
+      line
+    ) ||
+    (line.endsWith(":") && line.length < 90)
+  );
+}
+
+function createContentSlug(value, fallback) {
+  const slug = value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  return slug || fallback;
+}
+
+function buildReadableContent(text, anchorPrefix) {
+  const lines = (text || "").split(/\r?\n/);
+  const indexItems = [];
+  let html = "";
+  let inList = false;
+  let idx = 0;
+
+  const closeList = () => {
+    if (inList) {
+      html += "</ul>";
+      inList = false;
+    }
+  };
+
+  lines.forEach((raw) => {
+    const line = raw.trim();
+
+    if (!line) {
+      closeList();
+      return;
+    }
+
+    if (/^_{5,}$/.test(line)) {
+      closeList();
+      html += "<hr>";
+      return;
+    }
+
+    if (/^[-•]\s*/.test(line)) {
+      if (!inList) {
+        html += "<ul>";
+        inList = true;
+      }
+      html += `<li>${escapeHtml(line.replace(/^[-•]\s*/, ""))}</li>`;
+      return;
+    }
+
+    closeList();
+    if (isContentHeading(line)) {
+      idx += 1;
+      const anchorId = `${anchorPrefix}-${createContentSlug(line, `section-${idx}`)}-${idx}`;
+      indexItems.push({ id: anchorId, label: line });
+      html += `<h5 id="${anchorId}" class="content-heading">${escapeHtml(line)}</h5>`;
+      return;
+    }
+
+    html += `<p class="content-paragraph">${escapeHtml(line)}</p>`;
+  });
+
+  closeList();
+  return { html, indexItems };
+}
+
 function exportCurrentContractAsText() {
   const draft = getDraftFromForm();
   const text = [
@@ -864,14 +942,23 @@ function renderContracts() {
     fragment.querySelector(".contract-title").textContent = contract.title;
     fragment.querySelector(".contract-meta").textContent =
       `${contract.clientName} | ${formatDate(contract.signatureDate)} | ${contract.projectAmount} USD`;
-    fragment.querySelector(".scope-content").textContent = contract.designScope;
-    fragment.querySelector(".terms-content").textContent = contract.contractTerms;
+    const scopeSection = fragment.querySelector(".scope-section");
+    const termsSection = fragment.querySelector(".terms-section");
+    const safeId = createContentSlug(contract.id, crypto.randomUUID());
+    scopeSection.id = `scope-main-${safeId}`;
+    termsSection.id = `terms-main-${safeId}`;
+
+    const scopeReadable = buildReadableContent(contract.designScope, `scope-${safeId}`);
+    const termsReadable = buildReadableContent(contract.contractTerms, `terms-${safeId}`);
+    fragment.querySelector(".scope-content").innerHTML = scopeReadable.html;
+    fragment.querySelector(".terms-content").innerHTML = termsReadable.html;
 
     const loadBtn = fragment.querySelector(".load-btn");
     loadBtn.textContent = t("loadBtn");
     loadBtn.addEventListener("click", () => fillForm(contract));
 
     fragment.querySelector("summary").textContent = t("viewContent");
+    fragment.querySelector(".index-title").textContent = t("readingIndex");
     const sectionTitles = fragment.querySelectorAll("h4");
     sectionTitles[0].textContent = t("conception");
     sectionTitles[1].textContent = t("contract");
@@ -885,6 +972,17 @@ function renderContracts() {
     authorInput.placeholder = t("commentNamePlaceholder");
     commentText.placeholder = t("commentTextPlaceholder");
     fragment.querySelector(".comment-form button").textContent = t("commentBtn");
+
+    const indexLinks = fragment.querySelector(".index-links");
+    const allIndex = [
+      { id: scopeSection.id, label: t("conception") },
+      ...scopeReadable.indexItems,
+      { id: termsSection.id, label: t("contract") },
+      ...termsReadable.indexItems
+    ];
+    indexLinks.innerHTML = allIndex
+      .map((item) => `<li><a href="#${item.id}">${escapeHtml(item.label)}</a></li>`)
+      .join("");
 
     const commentForm = fragment.querySelector(".comment-form");
     commentForm.addEventListener("submit", (e) => handleCommentSubmit(e, contract.id));

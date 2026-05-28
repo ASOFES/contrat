@@ -63,9 +63,9 @@ let currentLanguage = localStorage.getItem(LANGUAGE_KEY) || "fr";
 
 const i18n = {
   fr: {
-    appTitle: "Publication de Contrats",
+    appTitle: "ASOFES - Publication de Contrats",
     languageLabel: "Langue",
-    topbarLoggedOut: "Portail client avec espace partage par societe",
+    topbarLoggedOut: "Portail ASOFES avec espace partage par societe",
     topbarLoggedIn: (company) => `Societe active: ${company}`,
     newContractBtn: "Nouveau contrat depuis modele",
     logoutBtn: "Deconnexion",
@@ -114,12 +114,12 @@ const i18n = {
     requiredFields: "Tous les champs sont obligatoires.",
     accountExists: "Ce compte existe deja pour cette societe.",
     badCredentials: "Informations de connexion invalides.",
-    companyExample: "Ex: Societe BMK",
+    companyExample: "Ex: Societe Client",
     fullnameExample: "Ex: Jean Kasongo",
     exportFileFallback: "contrat"
   },
   en: {
-    appTitle: "Contract Publishing Portal",
+    appTitle: "ASOFES - Contract Publishing Portal",
     languageLabel: "Language",
     topbarLoggedOut: "Client portal with shared company workspace",
     topbarLoggedIn: (company) => `Active company: ${company}`,
@@ -170,7 +170,7 @@ const i18n = {
     requiredFields: "All fields are required.",
     accountExists: "This account already exists for this company.",
     badCredentials: "Invalid login credentials.",
-    companyExample: "Ex: BMK Company",
+    companyExample: "Ex: Client Company",
     fullnameExample: "Ex: John Doe",
     exportFileFallback: "contract"
   }
@@ -303,7 +303,7 @@ function getDraftFromForm() {
 
 function fillForm(contract) {
   els.title.value = contract.title || "";
-  els.clientName.value = contract.clientName || "Societe BMK";
+  els.clientName.value = contract.clientName || "Nom du client";
   els.clientContact.value = contract.clientContact || "";
   els.projectAmount.value = contract.projectAmount ?? 0;
   els.signatureDate.value = contract.signatureDate || "";
@@ -320,9 +320,9 @@ function loadTemplate() {
   }
 
   fillForm({
-    title: "Contrat de prestation - BMK",
-    clientName: "Societe BMK",
-    clientContact: "+243 820 001 470 / +243 852 554 135",
+    title: "Contrat de prestation - ASOFES",
+    clientName: "Nom du client",
+    clientContact: "Contact client",
     projectAmount: 1700,
     signatureDate: "",
     designScope: defaultDesignScope,

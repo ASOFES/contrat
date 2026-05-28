@@ -24,6 +24,7 @@ const els = {
   loginSubmitBtn: document.getElementById("login-submit-btn"),
   sharedNote: document.getElementById("shared-note"),
   editorTitle: document.getElementById("editor-title"),
+  editorPanel: document.getElementById("editor-panel"),
   contractTitleLabel: document.getElementById("contract-title-label"),
   clientNameLabel: document.getElementById("client-name-label"),
   clientContactLabel: document.getElementById("client-contact-label"),
@@ -672,6 +673,7 @@ function getBMKStarterTemplate() {
 function loadNewContractFromButton() {
   requireSession();
   fillForm(getBMKStarterTemplate());
+  setEditorVisible(true);
 }
 
 function formatDate(dateIso) {
@@ -972,7 +974,10 @@ function renderContracts() {
 
     const loadBtn = fragment.querySelector(".load-btn");
     loadBtn.textContent = t("loadBtn");
-    loadBtn.addEventListener("click", () => fillForm(contract));
+    loadBtn.addEventListener("click", () => {
+      fillForm(contract);
+      setEditorVisible(true);
+    });
 
     fragment.querySelector("summary").textContent = t("viewContent");
     fragment.querySelector(".index-title").textContent = t("readingIndex");
@@ -1025,6 +1030,11 @@ function setSession(session) {
   updateVisibilityBySession();
 }
 
+function setEditorVisible(visible) {
+  els.editorPanel.classList.toggle("hidden", !visible);
+  els.appScreen.classList.toggle("editor-open", visible);
+}
+
 function updateVisibilityBySession() {
   const connected = Boolean(currentSession);
   els.authScreen.classList.toggle("hidden", connected);
@@ -1035,11 +1045,13 @@ function updateVisibilityBySession() {
   if (!connected) {
     els.sessionInfo.textContent = "";
     els.subtitle.textContent = t("topbarLoggedOut");
+    setEditorVisible(false);
     return;
   }
 
   els.sessionInfo.textContent = `${currentSession.fullName} | ${currentSession.companyName}`;
   els.subtitle.textContent = t("topbarLoggedIn")(currentSession.companyName);
+  setEditorVisible(false);
   loadTemplate();
   renderContracts();
 }

@@ -80,6 +80,68 @@ body {
   margin: 0 auto;
 }
 
+.welcome-hero {
+  max-width: 1320px;
+  margin: 1rem auto 0.25rem;
+  padding: 0 1rem;
+}
+
+.welcome-content {
+  background: linear-gradient(145deg, #0f2350 0%, #1d4ed8 100%);
+  color: #eff6ff;
+  border-radius: 18px;
+  padding: 1.2rem 1.25rem;
+  box-shadow: 0 16px 34px rgba(30, 64, 175, 0.24);
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.24rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  border: 1px solid rgba(191, 219, 254, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.welcome-content h2 {
+  margin: 0.65rem 0 0.4rem;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.welcome-content p {
+  margin: 0;
+  color: #dbeafe;
+  max-width: 850px;
+}
+
+.hero-metrics {
+  margin-top: 0.95rem;
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.hero-metrics article {
+  border: 1px solid rgba(191, 219, 254, 0.35);
+  border-radius: 12px;
+  padding: 0.65rem;
+  background: rgba(15, 23, 42, 0.2);
+}
+
+.hero-metrics strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.hero-metrics span {
+  display: block;
+  font-size: 0.86rem;
+  color: #cfe3ff;
+}
+
 .auth-layout {
   grid-template-columns: repeat(2, minmax(320px, 1fr));
   align-items: start;
@@ -99,6 +161,30 @@ body {
   margin: 0 0 1rem;
   font-size: 1.45rem;
   color: #0b1f45;
+}
+
+.trust-card {
+  margin-top: 0.75rem;
+  border: 1px solid #d7e3f5;
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  background: #f8fbff;
+}
+
+.trust-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: #0f2b57;
+}
+
+.trust-card ul {
+  margin: 0;
+  padding-left: 1rem;
+  color: #385171;
+}
+
+.trust-card li {
+  margin: 0.18rem 0;
 }
 
 .hidden {
@@ -286,6 +372,14 @@ pre {
     padding-top: 0.8rem;
   }
 
+  .welcome-content h2 {
+    font-size: 1.4rem;
+  }
+
+  .hero-metrics {
+    grid-template-columns: 1fr;
+  }
+
   .topbar {
     flex-direction: column;
     align-items: flex-start;
@@ -321,6 +415,20 @@ pre {
   }
 
   .panel h2 {
+    font-size: 1.2rem;
+  }
+
+  .welcome-hero {
+    margin-top: 0.75rem;
+    padding: 0 0.75rem;
+  }
+
+  .welcome-content {
+    border-radius: 14px;
+    padding: 0.95rem;
+  }
+
+  .welcome-content h2 {
     font-size: 1.2rem;
   }
 

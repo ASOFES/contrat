@@ -978,6 +978,47 @@ function getBMKStarterTemplate() {
   };
 }
 
+function syncBMKLanguageContentForSession() {
+  if (!currentSession) return;
+  if (!isBMKCompany(currentSession.companyName)) return;
+
+  const store = getCompanyStore(currentSession.companyId);
+  const useEnglish = currentLanguage === "en";
+  const expectedTitle = useEnglish ? "Unified Master Dossier - BMK" : "Dossier Complet Unifie - BMK";
+  const expectedScope = useEnglish ? bmkDesignScopeEn : bmkDesignScope;
+  const expectedTerms = useEnglish ? bmkContractTermsEn : bmkContractTerms;
+
+  if (store.template) {
+    store.template = {
+      ...store.template,
+      title: expectedTitle,
+      clientName: "Societe BMK",
+      clientContact: "+243 820 001 470 / +243 852 554 135",
+      designScope: expectedScope,
+      contractTerms: expectedTerms
+    };
+  }
+
+  store.contracts = store.contracts.map((contract) => {
+    const isBMKDossier =
+      contract.title === "Dossier Complet Unifie - BMK" ||
+      contract.title === "Unified Master Dossier - BMK";
+
+    if (!isBMKDossier) return contract;
+
+    return {
+      ...contract,
+      title: expectedTitle,
+      clientName: "Societe BMK",
+      clientContact: "+243 820 001 470 / +243 852 554 135",
+      designScope: expectedScope,
+      contractTerms: expectedTerms
+    };
+  });
+
+  updateCompanyStore(currentSession.companyId, store);
+}
+
 function loadNewContractFromButton() {
   requireSession();
   fillForm(getBMKStarterTemplate());
@@ -1457,6 +1498,7 @@ function logoutUser() {
 function switchLanguage(event) {
   currentLanguage = event.target.value;
   localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+  syncBMKLanguageContentForSession();
   applyLanguage();
 }
 
